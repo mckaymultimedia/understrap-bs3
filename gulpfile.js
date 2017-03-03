@@ -5,34 +5,33 @@ var basePaths = {
 };
 
 // Defining requirements
-var gulp = require('gulp');
-var plumber = require('gulp-plumber');
-var sass = require('gulp-sass');
-var watch = require('gulp-watch');
-var cssnano = require('gulp-cssnano');
-var rename = require('gulp-rename');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var merge2 = require('merge2');
-var ignore = require('gulp-ignore');
-var rimraf = require('gulp-rimraf');
+var gulp = require('gulp'),
+    autoprefixer = require('gulp-autoprefixer'),
+    concat = require('gulp-concat'),
+    cssnano = require('gulp-cssnano'),
+    ignore = require('gulp-ignore'),
+    imagemin = require('gulp-imagemin'),
+    merge2 = require('merge2'),
+    newer = require('gulp-newer'),
+    notify = require( 'gulp-notify' ),
+    plumber = require('gulp-plumber'),
+    postcss = require('gulp-postcss'),
+    rename = require('gulp-rename'),
+    rimraf = require('gulp-rimraf'),
+    sass = require('gulp-sass'),
+    uglify = require('gulp-uglify'),
+    watch = require('gulp-watch');
 
 // Run: 
 // gulp sass
 // Compiles SCSS files in CSS
 gulp.task('sass', function () {
-    gulp.src('./sass/*.scss')
-        .pipe(plumber())
-        .pipe(sass())
-        .pipe(gulp.dest('./css'));
-});
-
-// Run: 
-// gulp watch
-// Starts watcher. Watcher runs gulp sass task on changes
-gulp.task('watch', function () {
-    gulp.watch('./sass/**/*.scss', ['sass']);
-    gulp.watch('./css/theme.css', ['cssnano']);
+  gulp.src('./sass/*.scss')
+    .pipe(plumber())
+    .pipe(sass())
+    .pipe(postcss(autoprefixer))
+    .pipe(gulp.dest('./css'))
+    .pipe(notify({ message: 'Sass task complete' }));
 });
 
 // Run: 
@@ -40,10 +39,11 @@ gulp.task('watch', function () {
 // Minifies CSS files
 gulp.task('cssnano', ['cleancss'], function(){
   return gulp.src('./css/*.css')
-    .pipe(plumber())
+	.pipe(plumber())
     .pipe(rename({suffix: '.min'}))
     .pipe(cssnano({discardComments: {removeAll: true}}))
-    .pipe(gulp.dest('./css/'));
+    .pipe(gulp.dest('./css/'))
+	.pipe(notify({ message: 'Minify task complete' }));
 }); 
 
 gulp.task('cleancss', function() {
@@ -71,13 +71,34 @@ gulp.task('scripts', function() {
     basePaths.dev + 'js/skip-link-focus-fix.js'
     ])
     .pipe(concat('theme.js'))
-    .pipe(gulp.dest('./js/'));
+    .pipe(gulp.dest('./js/'))
+	.pipe(notify({ message: 'Scripts task complete' }));
+});
+
+// Run: 
+// gulp images
+// Compress and optimize images
+gulp.task('images', function() {
+  return gulp.src('./images/uncompressed/*')
+    .pipe(newer('./images'))
+    .pipe(imagemin({ optimizationLevel: 3, progressive: true, interlaced: true }))
+    .pipe(gulp.dest('./images'))
+    .pipe(notify({ message: 'Images task complete' }));
+});
+
+// Run: 
+// gulp watch
+// Starts watcher. Watcher runs gulp sass task on changes
+gulp.task('watch', function () {
+    gulp.watch('./sass/**/*.scss', ['sass']);
+    gulp.watch('./css/theme.css', ['cssnano']);
+	gulp.watch('./js/development/**/*.js', ['scripts'] );
+	gulp.watch('./images/uncompressed/**', ['images'] );
 });
 
 // Run: 
 // gulp copy-assets. 
 // Copy all needed dependency assets files from bower_component assets to themes /js, /scss and /fonts folder. Run this task after bower install or bower update
-
 
 ////////////////// All Bootstrap SASS 3 Assets /////////////////////////
 // Copy all Bootstrap JS files 
@@ -94,15 +115,14 @@ gulp.task('copy-assets', function() {
         .pipe(gulp.dest('./fonts'));
 ////////////////// End Bootstrap 3 Assets /////////////////////////
 
-
 ////////////////// All Bootstrap 4 Assets /////////////////////////
 // Copy all Bootstrap JS files 
-    gulp.src(basePaths.bower + 'bootstrap/js/**/*.js')
-       .pipe(gulp.dest(basePaths.dev + '/js/bootstrap4'));
+    // gulp.src(basePaths.bower + 'bootstrap/js/**/*.js')
+       // .pipe(gulp.dest(basePaths.dev + '/js/bootstrap4'));
 
 // Copy all Bootstrap SCSS files
-    gulp.src(basePaths.bower + 'bootstrap/scss/**/*.scss')
-       .pipe(gulp.dest(basePaths.dev + '/sass/bootstrap4'));
+    // gulp.src(basePaths.bower + 'bootstrap/scss/**/*.scss')
+       // .pipe(gulp.dest(basePaths.dev + '/sass/bootstrap4'));
 ////////////////// End Bootstrap 4 Assets /////////////////////////
 
 // Copy all Font Awesome Fonts
@@ -132,4 +152,8 @@ gulp.task('copy-assets', function() {
 // _s JS files
     gulp.src(basePaths.bower + '_s/js/*.js')
         .pipe(gulp.dest(basePaths.dev + '/js'));
+});
+
+// Default task -- runs scss and watch functions
+gulp.task( 'default', ['watch'], function() {
 });

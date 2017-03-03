@@ -1,0 +1,85 @@
+#1
+
+Error:
+
+Gem sass not installed
+
+Commands:
+
+mkdir ~/rubysass && cd ~/rubysass
+
+wget https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.1.tar.gz
+
+wget https://rubygems.org/rubygems/rubygems-2.6.7.zip
+
+sudo apt-get update && sudo apt-get install -y tar unzip
+
+tar zxvf ruby-2.3.1.tar.gz && unzip rubygems-2.6.7.zip
+
+cd ruby-2.3.1
+
+./configure && make && sudo make install
+
+cd ~/rubysass/rubygems-2.6.7
+
+sudo ruby setup.rb
+
+cd ~ && sudo gem install sass
+
+
+
+#2
+
+Error:
+
+Error in plugin 'gulp-notify'
+
+Message:
+
+not found: notify-send
+
+notify-send must be installed on the system.
+
+Commands:
+
+sudo apt-add-repository ppa:izx/askubuntu
+
+sudo apt-get update
+
+sudo apt-get install libnotify-bin
+
+
+
+#3
+
+Error:
+
+EPROTO: protocol error, symlink
+
+Commands:
+
+npm install --save-dev --no-bin-links <package>
+
+OR: 
+
+npm update --no-bin-links
+
+npm install --save-dev --no-bin-links
+
+nodejs node_modules/node-sass/scripts/install.js
+
+npm rebuild node-sass --no-bin-links
+
+
+
+#4
+
+Error:
+
+EACCES: permission denied, open '/home/vagrant/.config/configstore/bower-github.json'
+
+Commands:
+
+sudo chown -R $USER:$GROUP ~/.npm
+
+sudo chown -R $USER:$GROUP ~/.config
